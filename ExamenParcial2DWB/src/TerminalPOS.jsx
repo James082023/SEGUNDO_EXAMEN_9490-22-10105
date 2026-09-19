@@ -1,3 +1,7 @@
+import { useReducer, useState } from 'react';
+import ComandaDetalle from './ComandaDetalle';
+import TemporizadorPromo from './TemporizadorPromo';
+
 const MENU_INICIAL = [
   { id: 'h1', nombre: 'Hamburguesa Doble', precio: 45 },
   { id: 'p1', nombre: 'Papas Supremas', precio: 20 },
@@ -6,18 +10,21 @@ const MENU_INICIAL = [
 
 const facturasReducers = (state, action) => {
   switch (action.type) {
-    case 'GUARDAR_VENTA':
-      state.push({
+    case 'GUARDAR_VENTA': {
+      const nuevaFactura = {
         idFactura: Math.floor(Math.random() * 100000),
-        items: action.payload.items,
+        items: [...action.payload.items],
         total: action.payload.total,
         emitidoEl: new Date().toLocaleTimeString()
-      });
-      localStorage.setItem('cierre_caja', JSON.stringify(state)); 
-      return state;
+      };
+      const nuevoEstado = [...state, nuevaFactura];
+      localStorage.setItem('cierre_caja', JSON.stringify(nuevoEstado));
+      return nuevoEstado;
+    }
 
-    case 'REINICIAR_TURNO':
+    case 'REINICIAR_TURNO': {
       return [];
+    }
 
     default:
       return state;
@@ -26,16 +33,19 @@ const facturasReducers = (state, action) => {
 
 export default function TerminalPOS() {
   const [pedidoActual, setPedidoActual] = useState([]);
-  const [turnoAbierto, setTurnoAbierto] = useState(true);
+  const turnoAbierto = true;
 
-  const [cierreCaja, dispatch] = useReducer(facturasReducer, []);
-  const montoCobradoVisualRef = useRef(0);
+  const [cierreCaja, dispatch] = useReducer(facturasReducers, []);
+  const totalPedido = pedidoActual.reduce((total, item) => total + item.precio, 0);
 
   const handleAgregarProducto = (producto) => {
-    pedidoActual.push(producto);
-    setPedidoActual(pedidoActual); 
+    setPedidoActual((pedido) => [...pedido, { ...producto }]);
+  };
 
-    montoCobradoVisualRef.current += producto.precio;
+  const handleAplicarCortesia = (index) => {
+    setPedidoActual((pedido) => pedido.map((item, itemIndex) => (
+      itemIndex === index ? { ...item, precio: 0 } : item
+    )));
   };
 
   const handleCompletarOrden = () => {
@@ -45,12 +55,11 @@ export default function TerminalPOS() {
       type: 'GUARDAR_VENTA',
       payload: {
         items: pedidoActual,
-        total: montoCobradoVisualRef.current
+        total: totalPedido
       }
     });
 
     setPedidoActual([]);
-    montoCobradoVisualRef.current = 0;
   };
 
   return (
@@ -75,7 +84,8 @@ export default function TerminalPOS() {
 
       <ComandaDetalle
         items={pedidoActual}
-        totalVisualRef={montoCobradoVisualRef}
+        total={totalPedido}
+        onAplicarCortesia={handleAplicarCortesia}
         onCobrarOrden={handleCompletarOrden}
       />
 

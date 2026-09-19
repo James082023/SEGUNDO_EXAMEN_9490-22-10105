@@ -1,3 +1,5 @@
+import { useEffect, useState } from 'react';
+
 function TemporizadorPromo({ activo }) {
   const [segundos, setSegundos] = useState(30);
 
@@ -5,9 +7,11 @@ function TemporizadorPromo({ activo }) {
     let timer = null;
     if (activo) {
       timer = setInterval(() => {
-        setSegundos(segundos - 1);
+        setSegundos((valorActual) => Math.max(valorActual - 1, 0));
       }, 1000);
     }
+
+    return () => clearInterval(timer);
   }, [activo]);
 
   return (
@@ -16,3 +20,5 @@ function TemporizadorPromo({ activo }) {
     </div>
   );
 }
+
+export default TemporizadorPromo;

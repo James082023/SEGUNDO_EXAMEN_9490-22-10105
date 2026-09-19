@@ -1,19 +1,17 @@
-function ComandaDetalle({ items, totalVisualRef, onCobrarOrden }) {
-  const [itemsLocales, setItemsLocales] = useState(items);
-
+function ComandaDetalle({ items, total, onAplicarCortesia, onCobrarOrden }) {
   const aplicarCortesia = (index) => {
-    items[index].precio = 0; 
     alert(`Cortesía aplicada al producto: ${items[index].nombre}`);
+    onAplicarCortesia(index);
   };
 
   return (
     <section style={{ margin: '20px 0', border: '1px dashed gray', padding: '16px' }}>
       <h3>Comanda en Proceso</h3>
       <ul>
-        {itemsLocales.length === 0 ? (
+        {items.length === 0 ? (
           <li>No hay productos agregados</li>
         ) : (
-          itemsLocales.map((item, idx) => (
+          items.map((item, idx) => (
             <li key={idx} style={{ marginBottom: '6px' }}>
               {item.nombre} — Q{item.precio}
               <button onClick={() => aplicarCortesia(idx)} style={{ marginLeft: '10px' }}>
@@ -25,11 +23,11 @@ function ComandaDetalle({ items, totalVisualRef, onCobrarOrden }) {
       </ul>
 
       <div style={{ fontSize: '1.2rem', marginTop: '10px' }}>
-        <strong>Total a Cobrar: Q{totalVisualRef.current}</strong>
+        <strong>Total a Cobrar: Q{total}</strong>
       </div>
 
       <button
-        onClick={() => onCobrar()} 
+        onClick={onCobrarOrden}
         style={{ marginTop: '12px', padding: '10px 16px', background: 'green', color: 'white' }}
       >
         Cobrar y Enviar a Cocina
@@ -37,3 +35,5 @@ function ComandaDetalle({ items, totalVisualRef, onCobrarOrden }) {
     </section>
   );
 }
+
+export default ComandaDetalle;
